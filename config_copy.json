@@ -1,0 +1,19 @@
+{
+  "train": "/scr/data/nodules/luna/data/one/",
+  "val": "/scr/data/nodules/luna/data/onev/",
+  "date": "062117",
+  "iterations": 50,
+  "optimizer": "adadelta",
+  "rotation": 90,
+  "size": 48,
+  "batch_size": 16,
+  "model": "fpr_rv2_1b48",
+  "outputs": 2,
+  "full_model": "t",
+  "save_weights": "t",
+  "flip": "t",
+  "shift": 2,
+  "load_weights": "f",
+  "loss": "categorical_crossentropy",
+  "categorical_labels": "t"
+}
