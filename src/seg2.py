@@ -221,8 +221,8 @@ def runGenerator():
   datagen = ImageDataGenerator(
     featurewise_center=False, #center image mean for dataset at zero
     featurewise_std_normalization=False, #divide image by dataset std dev
-    zca_whitening=False, #TODO: TRY PCA WHITENING
-    rotation_range_x=20., #TODO: AT LEAST ONE MODEL WITH DATA FROM ALL POSSIBLE AXES & ROTATION
+    zca_whitening=False, 
+    rotation_range_x=20., 
     rotation_range_y=20.,
     rotation_range_z=20.,
     x_shift_range=(0.21875),#2./trainImages.shape[4]), #TODO: LOOK AT IMPLEMENTATION TO VERIFY
@@ -272,12 +272,11 @@ def runGenerator():
 
 
 if __name__ == '__main__':
-  #runGenerator()
-  getModel()
+  runGenerator()
+  #getModel()
   #go = True
   #while go:
   #  go = runGenerator()
-  #run()
 
 
 
