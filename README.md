@@ -1,5 +1,5 @@
 # cad17
-TODO: documentation
-TODO: add modified keras 3d source code
-TODO: import keras 3d directly
-TODO: clean and rename notebooks
+## Instructions for use:
+### 1. Download the datasets:
+###    - LUNA16 dataset (see https://luna16.grand-challenge.org/)
+###    - LIDC-IDRI dataset (see https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI)
