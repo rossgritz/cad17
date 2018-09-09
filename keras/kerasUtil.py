@@ -2,11 +2,13 @@ import sys
 import os
 
 sys.path.append('/home/g/Desktop/git/nodules/src/')
+sys.path.append('/home/admin/git/keras/keras/')
 
 import copy
 import numpy as np
 
 from keras import backend as K
+#import backend as K
 from keras.models import Sequential 
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution3D, MaxPooling3D

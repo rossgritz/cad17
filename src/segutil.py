@@ -18,16 +18,15 @@ import scipy.ndimage
 
 import matplotlib.pyplot as plt
 
-LUNA_PATH = '/scr/data/nodules/luna/train/subset9/'
-LUNA_AUX_PATH = '/scr/data/nodules/luna/CSVFILES/'
-LUNA_OUT_PATH = '/scr/data/nodules/testseg/final/nine/val/images/'
-XMLDIR = '/home/rrg0013@auburn.edu/xmlc/'
+LUNA_PATH = '/hdfs/a/subset9/'
+LUNA_AUX_PATH = '/hdfs/a/CSVFILES/'
+LUNA_OUT_PATH = '/hdfs/a/nodules/segimage/nine/images/'
+#XMLDIR = '/home/rrg0013@auburn.edu/xmlc/'
 DEBUG = False
 
 
-scanids = ['bin0'
-           ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.430109407146633213496148200410'\
-           ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.534083630500464995109143618896'\
+scanids = []#'bin0'
+''','1.3.6.1.4.1.14519.5.2.1.6279.6001.534083630500464995109143618896'\
            ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.868211851413924881662621747734'\
            ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.450501966058662668272378865145'\
            ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.295420274214095686326263147663'\
@@ -139,8 +138,7 @@ scanids = ['bin0'
            ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.300270516469599170290456821227'\
            ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.340158437895922179455019686521'\
            ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.387954549120924524005910602207'\
-           ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.392861216720727557882279374324']
-
+           ,'1.3.6.1.4.1.14519.5.2.1.6279.6001.392861216720727557882279374324']'''
 
 
 #Generate a spherical mask for a single nodule
@@ -210,19 +208,33 @@ def getROIs(image, mask, origin, annotations):
     x = coords[0]
     if image[z-32:z+32,y-32:y+32,x-32:x+32].shape != (64,64,64):
       continue
+    #  if z-32 < 0:
+
+    #  elif shape[0]-z < 32:
+
+    #  if y-32 < 0:
+
+    #  elif shape[1]-y < 32:
+
+    #  if x-32 < 0:
+
+    #  elif shape[2]-x < 32:
+    
+    #else:
+    iroi = mask[z-32:z+32,y-32:y+32,x-32:x+32]  
     mroi = mask[z-32:z+32,y-32:y+32,x-32:x+32]
     if np.sum(mroi[:,:,0]) > 0:
       print '\n\n\nERROR\n\nMASK ERROR\n\nERROR\n\n\n'
       continue
     mroi = flattenImage(mroi)
     mrois.append(mroi)
-    iroi = image[z-32:z+32,y-32:y+32,x-32:x+32]
+    #iroi = image[z-32:z+32,y-32:y+32,x-32:x+32]
     iroi = flattenImage(iroi)
     irois.append(iroi)
   return irois, mrois
 
 
-def getMasks():
+'''def getMasks():
   count = 0
   flag = False
   flagb = False
@@ -284,7 +296,7 @@ def getMasks():
             fname = LUNA_OUT_PATH+'/'+str(count)+'_mask.png'
             scipy.misc.toimage(mroi[:,:],cmin=0,cmax=1).save(fname)
             count += 1
-        print "TOTAL: " + str(count)
+        print "TOTAL: " + str(count)'''
 
 
 def getMasksRecover():
@@ -293,14 +305,14 @@ def getMasksRecover():
     df = pd.read_csv(LUNA_AUX_PATH+'annotations.csv')
     for fname in files:
       if ".mhd" in fname.lower():
-        print fname
+        '''print fname
         if scanids is not None:
           for scan in scanids:
             flag = True
             fno = fname[:-4]
             if fno == scan:
               flag = False
-              break
+              break'''
         fpath = os.path.join(parent,fname)
         itk = sitk.ReadImage(fpath)
         image = sitk.GetArrayFromImage(itk)
@@ -313,13 +325,14 @@ def getMasksRecover():
         annotations = df[df['seriesuid']==fname]
         annotations = annotations[['coordX','coordY','coordZ','diameter_mm']].as_matrix()
         if annotations.shape[0] == 0: continue
-        else: 
-          if flag: continue
+        #else: 
+        #  if flag: continue
         image = scipy.ndimage.interpolation.zoom(image, szfactor, mode='nearest')
         origin = np.array(itk.GetOrigin())
         mask = getImageMask(image.shape, origin, annotations)
         irois, mrois = getROIs(image, mask, origin, annotations)
         if len(irois) > 0 and len(mrois) > 0:
+          print "PRINTING IMAGES & MASKS"
           for i in range(len(irois)):
             mroi = mrois[i]
             iroi = irois[i]

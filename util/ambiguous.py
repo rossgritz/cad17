@@ -10,7 +10,6 @@ from collections import defaultdict
 from glob import glob
 
 BINNO = 0
-BINNO_ = 'zero'
 LUNA_PATH = '/scr/data/nodules/luna/test/subset'+str(BINNO)+'/'
 CAND_DAT_PATH = '/scr/data/nodules/testseg/final/finalt/'+BINNO_+'_.txt'
 CAND_PATH = '/scr/data/nodules/testseg/final/finalt/clean/f/'+BINNO_+'/'

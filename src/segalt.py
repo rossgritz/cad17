@@ -14,7 +14,6 @@ import scipy.ndimage
 
 import numpy as np
 
-import os
 from glob import glob
 
 from keras import backend as K
@@ -25,6 +24,7 @@ from keras.layers.convolutional import Cropping3D
 from keras.layers.merge import concatenate
 from keras.layers.advanced_activations import PReLU
 from keras.callbacks import ModelCheckpoint
+from keras.layers.noise import AlphaDropout
 #from keras.utils import plot_model
 
 from image3D import ImageDataGenerator
@@ -33,13 +33,12 @@ import kerasUtil as ku
 
 SMOOTHING = 1.e-12
 LR = 1.e-5
-ITERATIONS = 240
-PER_EPOCH = 400
-LOSSTHRESH = 0.40
+ITERATIONS = 100
+PER_EPOCH = 1500
 DATAPATH = '/scr/data/nodules/testseg/train/six/images/'
-OUTPATH = '/scr/data/nodules/testseg/final/six/c/'
-VALPATH = '/scr/data/nodules/testseg/final/six/val/images/'
-OUTFILE = '/scr/data/nodules/testseg/final/six/c/status.txt'
+OUTPATH = '/scr/data/nodules/testseg/train/six/a/'
+VALPATH = '/scr/data/nodules/testseg/train/six/val/images/'
+OUTFILE = '/scr/data/nodules/testseg/train/six/a/status.txt'
 
 
 def to3d(images, isimage=True):
@@ -132,33 +131,33 @@ def getAltModel():
 def getModel():
   inputdata = Input((1, 64, 64, 64))
   conv1 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(inputdata)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(inputdata)
   conv1 = PReLU()(conv1)
   conv2 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(conv1)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(conv1)
   conv2 = PReLU()(conv2)
   conv3 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(conv2)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(conv2)
   conv3 = PReLU()(conv3)
   pool1 = MaxPooling3D(pool_size=(2,2,2),data_format='channels_first')(conv3)
   encode1 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(pool1)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(pool1)
   encode1 = PReLU()(encode1)
   encode2 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(encode1)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(encode1)
   encode2 = PReLU()(encode2)
   encode3 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(encode2)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(encode2)
   encode3 = PReLU()(encode3)
   encode4 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(encode3)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(encode3)
   encode4 = PReLU()(encode4)
   upsampling1 = UpSampling3D(size=(2,2,2),data_format='channels_first')(encode4)
   finalShape = upsampling1.shape
@@ -167,33 +166,32 @@ def getModel():
     finalShape[3]/2),int(originalShape[4]/2-finalShape[4]/2)
   crop1 = Cropping3D(cropping=cropShape,data_format='channels_first')(conv3)
   concatenate1 = concatenate([upsampling1, crop1],axis=1)
-  dropout1 = Dropout(0.25)(concatenate1)
+  dropout1 = AlphaDropout(0.1)(concatenate1)
   expand1 = Convolution3D(256,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(dropout1)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(dropout1)
   expand1 = PReLU()(expand1)
   expand2 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(expand1)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(expand1)
   expand2 = PReLU()(expand2)
   expand3 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(expand2)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(expand2)
   expand3= PReLU()(expand3)
   expand4 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(expand3)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(expand3)
   expand4= PReLU()(expand4)
   expand5 = Convolution3D(128,kernel_size=3,data_format='channels_first',
-  	activation='relu', padding='valid', use_bias=True, 
-  	kernel_initializer='glorot_normal')(expand4)
+  	activation='selu', padding='valid', use_bias=True, 
+  	kernel_initializer='lecun_normal')(expand4)
   expand5= PReLU()(expand5)
   outputdata = Convolution3D(1,kernel_size=1,data_format='channels_first',
   	activation='sigmoid', padding='valid', use_bias=True, 
   	kernel_initializer='glorot_normal')(expand5)
   model = Model(inputs=inputdata, outputs=outputdata)
   model.compile(optimizer=Adam(lr=LR),loss=diceCoef)
-  #model.compile(optimizer='adadelta', loss=diceCoef)
   print model.summary() 
   return model
 
@@ -216,21 +214,19 @@ def runGenerator():
   print "MODEL GENERATED"
   checkpoint = ModelCheckpoint(OUTPATH+'/lowvalloss.h5',monitor='val_loss',
 			       save_weights_only=True,save_best_only=True)
-  last = ModelCheckpoint(OUTPATH+'/lowvalloss.h5',monitor='val_loss',
-                               save_weights_only=True,save_best_only=False)
   datagen = ImageDataGenerator(
     featurewise_center=False, #center image mean for dataset at zero
     featurewise_std_normalization=False, #divide image by dataset std dev
-    zca_whitening=False, 
-    rotation_range_x=20., 
-    rotation_range_y=20.,
-    rotation_range_z=20.,
-    x_shift_range=(0.21875),#2./trainImages.shape[4]), #TODO: LOOK AT IMPLEMENTATION TO VERIFY
-    y_shift_range=(0.21875),#2./trainImages.shape[3]), #TODO: VERIFY SHIFT IS EQUAL TO CROPPING
-    z_shift_range=(0.21875),#2./trainImages.shape[2]),
-    x_flip=False,#True,
-    y_flip=False,#True,
-    z_flip=False,#True,
+    zca_whitening=False, #TODO: TRY PCA WHITENING
+    rotation_range_x=90., #TODO: AT LEAST ONE MODEL WITH DATA FROM ALL POSSIBLE AXES & ROTATION
+    rotation_range_y=90.,
+    rotation_range_z=90.,
+    x_shift_range=(0.234375),#2./trainImages.shape[4]), #TODO: LOOK AT IMPLEMENTATION TO VERIFY
+    y_shift_range=(0.234375),#2./trainImages.shape[3]), #TODO: VERIFY SHIFT IS EQUAL TO CROPPING
+    z_shift_range=(0.234375),#2./trainImages.shape[2]),
+    x_flip=True,
+    y_flip=True,
+    z_flip=True,
     fill_mode='constant', #fill region outside boundaries w/ constant
     cval=0, #set at image mean zero
     shear_range=0., #set to zero for no effect
@@ -253,18 +249,16 @@ def runGenerator():
   while ct < iterations:
     metrics = model.fit_generator(datagen.flow_from_segmentation_directory(DATAPATH,batch_size=1,shuffle=True
                         #,save_to_dir=OUTPATH,save_prefix='sample',save_format='png'
-                        ),steps_per_epoch=PER_EPOCH,epochs=1,workers=1,callbacks=[checkpoint,last]
+                        ),steps_per_epoch=PER_EPOCH,epochs=1,workers=1,callbacks=[checkpoint]
                         ,validation_data=valgen.flow_from_segmentation_directory(VALPATH,batch_size=1,shuffle=False)
-                        ,validation_steps=40
+                        ,validation_steps=100
                         )
     ct += 1
     print "EPOCH #" + str(ct)
     loss = metrics.history['val_loss']
     f = open(OUTFILE,'a+')
-    f.write("EPOCH # "+str(ct)+" -- VAL LOSS: " +str(loss[0])+"-- TRAIN LOSS: " + str(metrics.history['loss']) + "\n")
+    f.write("EPOCH # "+str(ct)+" -- VAL LOSS: " +str(loss)+"-- TRAIN LOSS: " + str(metrics.history['loss']) + "\n")
     f.close()
-    if float(loss[0]) <= LOSSTHRESH:
-      os.rename(OUTPATH+'/lowvalloss.h5',OUTPATH+'/'+str(ct)+'.h5')
     #if loss[0] > 0.96:
     #  print loss
     #  return True
@@ -273,10 +267,10 @@ def runGenerator():
 
 if __name__ == '__main__':
   runGenerator()
-  #getModel()
   #go = True
   #while go:
   #  go = runGenerator()
+  #run()
 
 
 

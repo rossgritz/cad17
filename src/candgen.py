@@ -35,8 +35,11 @@ from skimage import feature
 
 STARTFILE = 0
 DATA_PATH = '/scr/data/nodules/luna/test/subset0/'
+DATA_PATH = '/home/g/nodules/'
 DATA_CANDIDATES_PATH = '/scr/data/nodules/testseg/cands/true/zero/'
+DATA_CANDIDATES_PATH = '/home/g/nodules/'
 LABELS_PATH = '/home/rrg0013@auburn.edu/git/nodules/resources/annotations.csv'
+LABELS_PATH = '/home/g/nodules/'
 
 
 def loadItk(f, opts):

@@ -17,156 +17,12 @@ import scipy.misc
 
 from keras import backend as K
 
+import scipy.ndimage
+
 try:
     from PIL import Image as pil_image
 except ImportError:
     pil_image = None
-
-'''
-def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
-                    fill_mode='nearest', cval=0.):
-    print("ROTATING WRONG FOR 3D")
-    """Performs a random rotation of a Numpy image tensor.
-
-    # Arguments
-        x: Input tensor. Must be 3D.
-        rg: Rotation range, in degrees.
-        row_axis: Index of axis for rows in the input tensor.
-        col_axis: Index of axis for columns in the input tensor.
-        channel_axis: Index of axis for channels in the input tensor.
-        fill_mode: Points outside the boundaries of the input
-            are filled according to the given mode
-            (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
-        cval: Value used for points outside the boundaries
-            of the input if `mode='constant'`.
-
-    # Returns
-        Rotated Numpy image tensor.
-    """
-    #x = x[0,:,:,:]
-    theta = np.pi / 180 * np.random.uniform(-rg, rg)
-    rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
-                                [np.sin(theta), np.cos(theta), 0],
-                                [0, 0, 1]])
-    h, w = x.shape[row_axis], x.shape[col_axis]
-    transform_matrix = transform_matrix_offset_center(rotation_matrix, h, w)
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
-    #x = np.expand_dims(x, axis=0)
-    return x
-
-
-
-
-def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0.):
-    print("SHIFTING WRONG FOR 3D")
-    """Performs a random spatial shift of a Numpy image tensor.
-
-    # Arguments
-        x: Input tensor. Must be 3D.
-        wrg: Width shift range, as a float fraction of the width.
-        hrg: Height shift range, as a float fraction of the height.
-        row_axis: Index of axis for rows in the input tensor.
-        col_axis: Index of axis for columns in the input tensor.
-        channel_axis: Index of axis for channels in the input tensor.
-        fill_mode: Points outside the boundaries of the input
-            are filled according to the given mode
-            (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
-        cval: Value used for points outside the boundaries
-            of the input if `mode='constant'`.
-
-    # Returns
-        Shifted Numpy image tensor.
-    """
-    #x = x[0,:,:,:]
-    h, w = x.shape[row_axis], x.shape[col_axis]
-    tx = np.random.uniform(-hrg, hrg) * h
-    ty = np.random.uniform(-wrg, wrg) * w
-    translation_matrix = np.array([[1, 0, tx],
-                                   [0, 1, ty],
-                                   [0, 0, 1]])
-
-    transform_matrix = translation_matrix  # no need to do offset
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
-    #x = np.expand_dims(x, axis=0)
-    return x
-'''
-
-'''
-def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0.):
-    """Performs a random spatial shear of a Numpy image tensor.
-
-    # Arguments
-        x: Input tensor. Must be 3D.
-        intensity: Transformation intensity.
-        row_axis: Index of axis for rows in the input tensor.
-        col_axis: Index of axis for columns in the input tensor.
-        channel_axis: Index of axis for channels in the input tensor.
-        fill_mode: Points outside the boundaries of the input
-            are filled according to the given mode
-            (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
-        cval: Value used for points outside the boundaries
-            of the input if `mode='constant'`.
-
-    # Returns
-        Sheared Numpy image tensor.
-    """
-    #x = x[0,:,:,:]
-    shear = np.random.uniform(-intensity, intensity)
-    shear_matrix = np.array([[1, -np.sin(shear), 0],
-                             [0, np.cos(shear), 0],
-                             [0, 0, 1]])
-
-    h, w = x.shape[row_axis], x.shape[col_axis]
-    transform_matrix = transform_matrix_offset_center(shear_matrix, h, w)
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
-    #x = np.expand_dims(x, axis=0)
-    return x
-'''
-
-
-'''
-def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
-                fill_mode='nearest', cval=0.):
-    """Performs a random spatial zoom of a Numpy image tensor.
-
-    # Arguments
-        x: Input tensor. Must be 3D.
-        zoom_range: Tuple of floats; zoom range for width and height.
-        row_axis: Index of axis for rows in the input tensor.
-        col_axis: Index of axis for columns in the input tensor.
-        channel_axis: Index of axis for channels in the input tensor.
-        fill_mode: Points outside the boundaries of the input
-            are filled according to the given mode
-            (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
-        cval: Value used for points outside the boundaries
-            of the input if `mode='constant'`.
-
-    # Returns
-        Zoomed Numpy image tensor.
-
-    # Raises
-        ValueError: if `zoom_range` isn't a tuple.
-    """
-    if len(zoom_range) != 2:
-        raise ValueError('zoom_range should be a tuple or list of two floats. '
-                         'Received arg: ', zoom_range)
-
-    if zoom_range[0] == 1 and zoom_range[1] == 1:
-        zx, zy = 1, 1
-    else:
-        zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
-    zoom_matrix = np.array([[zx, 0, 0],
-                            [0, zy, 0],
-                            [0, 0, 1]])
-
-    h, w = x.shape[row_axis], x.shape[col_axis]
-    transform_matrix = transform_matrix_offset_center(zoom_matrix, h, w)
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
-    return x
-'''
-
 
 
 def random_channel_shift(x, intensity, channel_axis=0):
@@ -179,8 +35,6 @@ def random_channel_shift(x, intensity, channel_axis=0):
     return x
 
 
-
-
 def transform_matrix_offset_center(matrix, x, y, z):
     o_x = float(x) / 2 + 0.5
     o_y = float(y) / 2 + 0.5
@@ -189,8 +43,6 @@ def transform_matrix_offset_center(matrix, x, y, z):
     reset_matrix = np.array([[1, 0, -o_x], [0, 1, -o_y], [0, 0, -o_z]])
     transform_matrix = np.dot(np.dot(offset_matrix, matrix), reset_matrix)
     return transform_matrix
-
-
 
 
 def apply_transform(x,
@@ -508,7 +360,7 @@ class ImageDataGenerator(object):
             save_format=save_format,
             follow_links=follow_links)
 
-    def flow_from_segmentation_directory(self, directory,
+    def flow_from_training_directory(self, directory,
                             target_size=(512, 512), color_mode='grayscale',
                             classes=None, class_mode='categorical',
                             batch_size=32, shuffle=True, seed=None,
@@ -516,7 +368,7 @@ class ImageDataGenerator(object):
                             save_prefix='',
                             save_format='jpeg',
                             follow_links=False):
-        return SegmentationDirectoryIterator(
+        return TrainingDirectoryIterator(
             directory, self,
             target_size=target_size, color_mode=color_mode,
             classes=classes, class_mode=class_mode,
@@ -549,21 +401,9 @@ class ImageDataGenerator(object):
             x /= (np.std(x, keepdims=True) + 1e-7)
 
         if self.featurewise_center:
-            if self.mean is not None:
-                x -= self.mean
-            else:
-                warnings.warn('This ImageDataGenerator specifies '
-                              '`featurewise_center`, but it hasn\'t'
-                              'been fit on any training data. Fit it '
-                              'first by calling `.fit(numpy_data)`.')
+            x -= 0.2#self.mean
         if self.featurewise_std_normalization:
-            if self.std is not None:
-                x /= (self.std + 1e-7)
-            else:
-                warnings.warn('This ImageDataGenerator specifies '
-                              '`featurewise_std_normalization`, but it hasn\'t'
-                              'been fit on any training data. Fit it '
-                              'first by calling `.fit(numpy_data)`.')
+            x /= 0.2#(self.std + 1e-7)
         '''        
         if self.zca_whitening:
             if self.principal_components is not None:
@@ -596,7 +436,7 @@ class ImageDataGenerator(object):
         y_axis = self.col_axis-1
         z_axis = self.channel_axis-1
 
-        xmean = 0#np.mean(x, keepdims=True)
+        xmean = 0.0#2#np.mean(x, keepdims=True)
 
        # use composition of homographies
         # to generate final transform that needs to be applied
@@ -634,51 +474,6 @@ class ImageDataGenerator(object):
         if tx != 0 or ty != 0 or tz != 0:
             x = ndi.interpolation.shift(x, (tx, ty, tz),cval=xmean)
 
-        '''
-        if self.shear_range:
-            shear = np.random.uniform(-self.shear_range, self.shear_range)
-        else:
-            shear = 0
-
-        if self.zoom_range[0] == 1 and self.zoom_range[1] == 1:
-            zx, zy = 1, 1
-        else:
-            zx, zy = np.random.uniform(self.zoom_range[0], self.zoom_range[1], 2)
-        
-        transform_matrix = None
-        if theta != 0:
-            rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
-                                        [np.sin(theta), np.cos(theta), 0],
-                                        [0, 0, 1]])
-            transform_matrix = rotation_matrix
-
-        if tx != 0 or ty != 0 or tz != 0:
-            shift_matrix = np.array([[1, 0, tx],
-                                     [0, 1, ty],
-                                     [0, 0, tz]])
-            transform_matrix = shift_matrix if transform_matrix is None else np.dot(transform_matrix, shift_matrix)
-
-        if shear != 0:
-            shear_matrix = np.array([[1, -np.sin(shear), 0],
-                                    [0, np.cos(shear), 0],
-                                    [0, 0, 1]])
-            transform_matrix = shear_matrix if transform_matrix is None else np.dot(transform_matrix, shear_matrix)
-
-        if zx != 1 or zy != 1:
-            zoom_matrix = np.array([[zx, 0, 0],
-                                    [0, zy, 0],
-                                    [0, 0, 1]])
-            transform_matrix = zoom_matrix if transform_matrix is None else np.dot(transform_matrix, zoom_matrix)
-        '''
-
-        '''
-        if transform_matrix is not None:
-            i, j, k = x.shape[x_axis], x.shape[y_axis], z.shape[z_axis]
-            transform_matrix = transform_matrix_offset_center(transform_matrix, i, j, k)
-            x = apply_transform(x, transform_matrix, img_channel_axis,
-                                fill_mode=self.fill_mode, cval=self.cval)
-        '''
-
         if self.x_flip:
             if np.random.random() < 0.5:
                 x = flip_axis(x, x_axis)
@@ -700,7 +495,7 @@ class ImageDataGenerator(object):
         y_axis = self.col_axis-1
         z_axis = self.channel_axis-1
 
-        xmean = 0#np.mean(x, keepdims=True)
+        xmean = 0.0#np.mean(x, keepdims=True)
 
         if self.rotation_range_x:
             theta = np.pi / 180 * np.random.uniform(-self.rotation_range_x, self.rotation_range_x)
@@ -1153,18 +948,23 @@ def array_to_3d_img(img, mask=False):
 
 
 def img_to_3d_array(img, mask=False):
+    #print ("img.shape")
+    #print (img.shape)
     if not mask:
-        newImage = np.zeros((64,64,64))
-        for i in range(8):
+        newImage = np.zeros((32,32,32))
+        for i in range(4):
             for j in range(8):
-                newImage[i*8+j,:,:] = img[i*64:(i+1)*64,j*64:(j+1)*64]
-	newImage /= 255.
+                newImage[i*8+j,:,:] = img[i*32:(i+1)*32,j*32:(j+1)*32]
+    #newImage /= 255.
     else:
         newImage = np.zeros((32,32,32))
         for i in range(2,6):
             for j in range(8):
                 newImage[(i-2)*8+j,:,:] = img[i*64+16:(i+1)*64-16,j*64+16:(j+1)*64-16]
+    if not mask:
+        newImage /= 255.
     return newImage
+
 
 
 def mask_image(image, mask, fullMask=False):
@@ -1180,7 +980,7 @@ def mask_image(image, mask, fullMask=False):
 
 
 
-class SegmentationDirectoryIterator(Iterator):
+class TrainingDirectoryIterator(Iterator):
 
     def __init__(self, directory, image_data_generator,
                  target_size=(512, 512), color_mode='grayscale',
@@ -1197,12 +997,12 @@ class SegmentationDirectoryIterator(Iterator):
         self.image_shape = (1,) + self.target_size
         self.class_mode = class_mode
         self.color_mode = color_mode
-
+        self.class_mode = class_mode
         self.save_to_dir = save_to_dir
         self.save_prefix = save_prefix
         self.save_format = save_format
 
-        print(batch_size)
+        white_list_formats = {'png', 'jpg', 'jpeg', 'bmp'}
 
         # first, count the number of samples and classes
         self.samples = 0
@@ -1215,25 +1015,10 @@ class SegmentationDirectoryIterator(Iterator):
         self.num_class = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
 
-        #for subdir in classes:
-        #    subpath = os.path.join(directory, subdir)
-        #for root, _, files in _recursive_list(directory):
-        for parent, subdir, files in os.walk(directory):
-            for fname in files:
-                is_valid = False
-                #for extension in white_list_formats:
-                if fname[-4:] == '.png':# + extension):
-                    is_valid = True
-                    #break
-                if is_valid:
-                    self.samples += 1
-        print('Found %d images belonging to %d classes.' % (self.samples, self.num_class))
+        def _recursive_list(subpath):
+            return sorted(os.walk(subpath, followlinks=follow_links), key=lambda tpl: tpl[0])
 
-        # second, build an index of the images in the different class subfolders
-        self.filenames = []
-        self.classes = np.zeros((self.samples,), dtype='int32')
-        i = 0
-        '''for subdir in classes:
+        for subdir in classes:
             subpath = os.path.join(directory, subdir)
             for root, _, files in _recursive_list(subpath):
                 for fname in files:
@@ -1242,21 +1027,31 @@ class SegmentationDirectoryIterator(Iterator):
                         if fname.lower().endswith('.' + extension):
                             is_valid = True
                             break
-                    if is_valid:'''
-        for parent, subdir, files in os.walk(directory):
-            for fname in files:
-                is_valid = False
-                #for extension in white_list_formats:
-                if fname[-4:] == '.png':# + extension):
-                    is_valid = True
-                    #break
-                if is_valid:
-                    self.classes[i] = -1
-                    i += 1
-                    # add filename relative to directory
-                    absolute_path = os.path.join(directory, fname)
-                    self.filenames.append(os.path.relpath(absolute_path, directory))
-        super(SegmentationDirectoryIterator, self).__init__(self.samples, batch_size, shuffle, seed)
+                    if is_valid:
+                        self.samples += 1
+        print('Found %d images belonging to %d classes.' % (self.samples, self.num_class))
+
+        # second, build an index of the images in the different class subfolders
+        self.filenames = []
+        self.classes = np.zeros((self.samples,), dtype='int32')
+        i = 0
+        for subdir in classes:
+            subpath = os.path.join(directory, subdir)
+            for root, _, files in _recursive_list(subpath):
+                for fname in files:
+                    is_valid = False
+                    for extension in white_list_formats:
+                        if fname.lower().endswith('.' + extension):
+                            is_valid = True
+                            break
+                    if is_valid:
+                        self.classes[i] = self.class_indices[subdir]
+                        i += 1
+                        # add filename relative to directory
+                        absolute_path = os.path.join(root, fname)
+                        self.filenames.append(os.path.relpath(absolute_path, directory))
+        super(TrainingDirectoryIterator, self).__init__(self.samples, batch_size, shuffle, seed)
+
 
     def next(self):
         """For python 2.x.
@@ -1268,12 +1063,12 @@ class SegmentationDirectoryIterator(Iterator):
             index_array, current_index, current_batch_size = next(self.index_generator)
         # The transformation of images is not under thread lock
         # so it can be done in parallel
-        batch_x = np.zeros((current_batch_size,) + (1,64,64,64), dtype=K.floatx())
-        batch_y = np.zeros((current_batch_size,) + (1,32,32,32), dtype=K.floatx())
+        batch_x = np.zeros((current_batch_size,) + (1,32,32,32), dtype=K.floatx())
+        batch_y = np.zeros((current_batch_size,) + (1,2), dtype=K.floatx())
 
         grayscale = self.color_mode == 'grayscale'
         # build batch of image data
-        print(index_array)
+        #print(index_array)
         for i, j in enumerate(index_array):
             fname = self.filenames[j]
             img = scipy.misc.imread(os.path.join(self.directory, fname))#,
@@ -1283,42 +1078,56 @@ class SegmentationDirectoryIterator(Iterator):
             #print(np.sum(img))
 
             x = img_to_3d_array(img)
+           
+            #:print(x)
+            #print('HELLO WORLD')
+            """SWITCH FOR GUASSIAN FILTER"""
+            #x = scipy.ndimage.filters.gaussian_filter(x, 2., truncate=4.)
+#print(np.sum(x))
 
-            #print(np.sum(x))
+            #fname = os.path.join(self.directory, fname)
+            #fname = fname[:-9] #Truncates image filename 
+            #fname = fname.split('/')
+            #fname[-2] = 'masks'
+            #fname2 = ''
+            #for pt in range(1,len(fname)):
+            #    fname2 = fname2 + '/' + fname[pt]
 
-            fname = os.path.join(self.directory, fname)
-            binno = fname[-11]
-            fname = fname[:-10] #Truncates image filename 
-            fname = fname.split('/')
-            fname[-2] = 'masks'
-            fname2 = ''
-            for pt in range(1,len(fname)):
-                fname2 = fname2 + '/' + fname[pt]
-
-            if fname2[-1] == '_':
-                fname2 = fname2 + 'mask.png'
-            else:
-               fname2 = fname2 + '_mask.png'
-            y = scipy.misc.imread(fname2)
+            #if fname2[-1] == '_':
+            #    fname2 = fname2 + 'mask.png'
+            #else:
+            #   fname2 = fname2 + '_mask.png'
+            #tmp = np.zeros((2))
+            #print (fname)
+            #if fname[0] == 't':
+            #  tmp[0]=1
+            #  y = tmp
+            #elif fname[0] == 'f':
+            #  tmp[1]=1
+            #  y = 0
+            #else:
+            #  print ("\n\n\nERROR\n\n\n")
+            #y = scipy.misc.imread(fname2)
 
             #print(np.sum(y))
 
-            y = img_to_3d_array(y,True)
-            y = np.clip(y,0,1)
-            y = np.where(y < 1, 0, y)
+            #y = img_to_3d_array(y,True)
+            #y = np.clip(y,0,1)
+            #y = np.where(y < 1, 0, y)
             #print(np.sum(y))
 
-            x,y = self.image_data_generator.dual_random_transform(x,y)
+            x = self.image_data_generator.random_transform(x)
         
             #print(np.sum(x))
             #print(np.sum(y))
 
+	    #print ("TRANSFORMED")  
             x = self.image_data_generator.standardize(x)
-
+            #print ("NORMALIZED")
             #print(np.sum(x))
 
             batch_x[i] = x
-            batch_y[i] = y
+            #batch_y[i] = y
             #print('\n')
         #print(np.sum(x))
         #print(np.sum(y))
@@ -1356,7 +1165,7 @@ class SegmentationDirectoryIterator(Iterator):
                 img.save(os.path.join(self.save_to_dir, fname))
 
         # build batch of labels
-        '''if self.class_mode == 'sparse':
+        if self.class_mode == 'sparse':
             batch_y = self.classes[index_array]
         elif self.class_mode == 'binary':
             batch_y = self.classes[index_array].astype(K.floatx())
@@ -1365,7 +1174,7 @@ class SegmentationDirectoryIterator(Iterator):
             for i, label in enumerate(self.classes[index_array]):
                 batch_y[i, label] = 1.
         else:
-            return batch_x'''
+            return batch_x
 
         #print("GENERATES BATCH OF DATA")
         return batch_x, batch_y
